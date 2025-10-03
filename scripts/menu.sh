@@ -75,7 +75,7 @@ check_setup() {
         success "Setup is complete"
         return 0
     else
-        warning "Setup is incomplete - running setup script"
+        warning "Setup is incomplete"
         return 1
     fi
 }
@@ -112,14 +112,14 @@ run_dev() {
 
 # Function to display interactive menu
 show_menu() {
-    echo "REACT LARAVEL  Starter"
+    echo "REACT LARAVEL STARTER"
     echo ""
     info "Available OPTIONS:"
     echo ""
-    echo "  1. install (composer and node dependencies)"
-    echo "  2. migrate (database migration and backup)"
-    echo "  3. build (run build in backend & frontend)"
-    echo "  4. start (cd ./backend && composer run dev)"
+    echo "  1. start (cd ./backend && composer run dev)"
+    echo "  2. install (composer and node dependencies)"
+    echo "  3. migrate (database migration and backup)"
+    echo "  4. build (run build in backend & frontend)"
     echo "  5. docker (run docker build compose up -d)"
     echo "  6. update (update composer & node packages)"
     echo "  7. optimize (php artisan optimize & clear)"
@@ -127,11 +127,35 @@ show_menu() {
     echo "  9. repair (fix composer and node problems)"
     echo "  0. quit (ctrl + q to exit)"
     echo ""
-    read -p "$(prompt "select option(0-9): ")" choice
-    echo ""
+
+    # Read a single keypress (no Enter required)
+    read -n1 -r -p "$(prompt "select option(0-9): ")" choice
+    echo
+    echo
 
     case $choice in
         1)
+            if check_setup; then
+                run_dev
+            else
+                info "Missing dependencies. Running setup first..."
+                if ./scripts/check.sh; then
+                    # Reuse the same interactive package manager selection logic as install
+                    if [ -f ".package-manager" ] && [ -n "$(cat .package-manager 2>/dev/null | tr -d '\n\r')" ]; then
+                        ./scripts/setup.sh
+                    else
+                        ./scripts/setup.sh --force-pm-select
+                    fi
+
+                    info "Setup finished. Starting development servers..."
+                    run_dev
+                else
+                    warning "System requirements not met. Setup cancelled."
+                    show_menu
+                fi
+            fi
+            ;;
+        2)
             if ./scripts/check.sh; then
                 echo ""
                 info "Running setup script..."
@@ -148,25 +172,17 @@ show_menu() {
                 show_menu
             fi
             ;;
-        2)
+        3)
             info "Running migrate script..."
             ./scripts/migrate.sh
             echo ""
             show_menu
             ;;
-        3)
+        4)
             info "Running build script..."
             ./scripts/build.sh
             echo ""
             show_menu
-            ;;
-        4)
-            if check_setup; then
-                run_dev
-            else
-                warning "Setup is incomplete. Please run setup first."
-                show_menu
-            fi
             ;;
         5)
             info "Running Docker operations..."

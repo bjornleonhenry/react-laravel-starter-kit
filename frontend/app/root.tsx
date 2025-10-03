@@ -8,7 +8,15 @@ import { initializeTheme } from '~/core/hooks/use-appearance'
 import { Toaster } from 'sonner'
 
 export function HydrateFallback() {
-  return <div>Loading...</div>;
+  return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div
+        className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 dark:border-white"
+        role="status"
+        aria-label="Loading"
+      />
+    </div>
+  );
 }
 
 export const links: Route.LinksFunction = () => [

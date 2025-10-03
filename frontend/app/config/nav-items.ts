@@ -16,17 +16,17 @@ export const mainNavItems: NavItem[] = [
 
 export const footerNavItems: NavItem[] = [
     {
-        title: 'React Frontend',
+        title: 'React +Vite Frontend',
         to: 'https://github.com/bjornleonhenry/react-laravel-frontend',
         icon: CirclePlay,
     },
     {
-        title: 'Laravel Backend',
+        title: 'Laravel Backend Api',
         to: 'https://github.com/bjornleonhenry/react-laravel-backend',
         icon: SquareCode,
     },
     {
-        title: 'React Laravel Kit',
+        title: 'Project Source Code',
         to: 'https://github.com/bjornleonhenry/react-laravel-starter-kit',
         icon: Tractor,
     },
