@@ -1,0 +1,53 @@
+import { useParams } from 'react-router'
+import AppLayout from '~/core/layouts/app-layout'
+import { setMeta } from '~/core/lib/meta'
+import { get{{pascalSingular}}, update{{pascalSingular}} } from './api'
+import { useResourceForm } from '~/core/hooks/use-resource-form'
+import InputField from '~/components/forms/input-field'
+import FormActions from '~/components/forms/form-actions'
+import type { BreadcrumbItem } from '~/core/types'
+import type { {{pascalSingular}} } from './types'
+
+const title = 'Edit {{titleSingular}}'
+
+export function meta() {
+    return setMeta(title)
+}
+
+export default function {{pascalSingular}}Page() {
+    const { id = '' } = useParams<{ id: string }>()
+
+    const { form, onSubmit, recentlySuccessful, isSubmitting } = useResourceForm<{{pascalSingular}}>({
+        id,
+        fetch: get{{pascalSingular}},
+        update: update{{pascalSingular}},
+    })
+
+    const { register, formState: { errors } } = form
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: '{{titlePlural}}', href: '/{{kebabPlural}}' },
+        { title, href: `/{{kebabPlural}}/${id}` },
+    ]
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <form onSubmit={onSubmit} className="max-w-lg p-4 space-y-6">
+                <InputField
+                    name="name"
+                    label="Name"
+                    autoComplete="name"
+                    disabled={isSubmitting}
+                    register={register('name')}
+                    error={errors.name}
+                />
+
+                <FormActions
+                    backTo="/{{kebabPlural}}"
+                    isSubmitting={isSubmitting}
+                    recentlySuccessful={recentlySuccessful}
+                />
+            </form>
+        </AppLayout>
+    )
+}

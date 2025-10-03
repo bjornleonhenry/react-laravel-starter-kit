@@ -1,0 +1,42 @@
+import type { ColumnDef } from '@tanstack/react-table'
+import type { {{pascalSingular}} } from './types'
+import { col, actionsCol } from '~/components/table/columns'
+
+type ColumnCallbacks = {
+    onEdit: ({{camelSingular}}: {{pascalSingular}}) => void
+    onDelete: ({{camelSingular}}: {{pascalSingular}}) => void
+}
+
+export function getColumns({ onEdit, onDelete }: ColumnCallbacks): ColumnDef<{{pascalSingular}}>[] {
+    return [
+
+        col<{{pascalSingular}}>('id', {
+            label: '#',
+            sortable: true,
+            format: (val) => val,
+        }),
+
+        col<{{pascalSingular}}>('name', {
+            label: 'Name',
+            sortable: true,
+            format: (val) => val,
+        }),
+
+        col<{{pascalSingular}}>('created_at', {
+            label: 'Created at',
+            align: 'right',
+            format: (val) => (val ? new Date(val).toLocaleDateString() : '-'),
+        }),
+
+        col<{{pascalSingular}}>('updated_at', {
+            label: 'Updated at',
+            align: 'right',
+            format: (val) => (val ? new Date(val).toLocaleDateString() : '-'),
+        }),
+
+        actionsCol<{{pascalSingular}}>({{camelSingular}} => [
+            { label: 'Edit', onClick: () => onEdit({{camelSingular}}) },
+            { label: 'Delete', onClick: () => onDelete({{camelSingular}}) },
+        ]),
+    ]
+}

@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    container_name: react-laravel-backend
+    ports:
+      - "8000:80"
+    volumes:
+      - ..:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY:-}
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+      - CACHE_DRIVER=file
+      - QUEUE_CONNECTION=sync
+      - SESSION_DRIVER=file
+      - APP_DEBUG=true
+    networks:
+      - backend-network
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: alpine:latest
+    container_name: react-laravel-db
+    volumes:
+      - sqlite_data:/var/lib/sqlite
+      - ../database:/var/www/database
+    networks:
+      - backend-network
+    command: sh -c "chmod 777 /var/lib/sqlite && tail -f /dev/null"
+
+  # Database management service
+  db-admin:
+    image: adminer:latest
+    container_name: react-laravel-adminer
+    ports:
+      - "8080:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=db
+    networks:
+      - backend-network
+    depends_on:
+      - db
+    profiles:
+      - admin
+
+networks:
+  backend-network:
+    driver: bridge
+
+volumes:
+  sqlite_data:

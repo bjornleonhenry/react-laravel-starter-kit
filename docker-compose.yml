@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Frontend Service (React Router)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development-dependencies-env
+    container_name: react-laravel-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://backend:8000
+    command: npm run dev
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Backend Service (Laravel)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: react-laravel-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    environment:
+      - APP_ENV=local
+      - APP_KEY=${APP_KEY:-}
+      - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/database.sqlite
+      - CACHE_DRIVER=file
+      - QUEUE_CONNECTION=sync
+      - SESSION_DRIVER=file
+    networks:
+      - app-network
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  # Database Service (SQLite - using a volume for persistence)
+  db:
+    image: alpine:latest
+    container_name: react-laravel-db
+    volumes:
+      - sqlite_data:/var/lib/sqlite
+      - ./backend/database:/var/www/database
+    networks:
+      - app-network
+    command: sh -c "chmod 777 /var/lib/sqlite && tail -f /dev/null"
+
+  # Production Frontend Service
+  frontend-prod:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-laravel-frontend-prod
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://backend:8000
+    command: npm run start
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    profiles:
+      - production
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  sqlite_data:
+  node_modules:
